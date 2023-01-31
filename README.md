@@ -13,8 +13,9 @@ To create a Linux virtual environment with Docker on a Mac:
 FROM archlinux:latest    
 
 # Updates the system's package databases and # Installing some packages (feel free to add packages that you need)
+RUN pacman -Syy
 RUN echo "Y" | pacman -Syu    
-RUN echo "Y" | pacman -S gcc git make vim sudo gdb valgrind zsh glibc python3 python3-pip unzip wget curl cmake
+RUN echo "Y" | pacman -S gcc git make vim sudo gdb valgrind zsh glibc python3 python-pip unzip wget curl cmake
 
 # Adds a new user "asioud" to the system and set a password for it
 RUN useradd -m -G users -s /bin/bash asioud   
@@ -28,13 +29,16 @@ RUN su - asioud -c "pip install --user pygments norminette"
 
 # Sets the system time zone to Europe/Berlin by copying the time zone information to the /etc/localtime file.
 RUN cp /usr/share/zoneinfo/Europe/Berlin /etc/localtime 
+
+# Sets the PATH environment variable to include the $HOME/.local/bin directory. (colour-valgrind doesn't work without it)
+RUN echo "export PATH=$PATH:$HOME/.local/bin" >> ~/.zshrc
 ```
 
-6. In the terminal, navigate to the home directory and run "docker build -t [image name] ." to build the Docker image.
+6. In the terminal, navigate to the home directory and run `docker build -t arch:42 docker_image/` to build the Docker image.
 7. Running the script to get inside the Linux container:
 Details are not provided in the original text.
 ```bash
-#!/bin/bash -l
+#!/bin/bash
 
 # Get the name of the script
 me=`basename "$0"`
@@ -50,14 +54,11 @@ VAR="/home/${NEWVAR}"
 
 # Check if an alias for the script exists in the .zshrc file
 if grep -q "alias archlinux=" $HOME/.zshrc; then
-    echo found
+    echo ""
 else
 	# If the alias doesn't exist, add it to the .zshrc file
 	echo "alias archlinux=${SCRIPTPATH}/${me}" >> $HOME/.zshrc 
 fi
-
-# Add the .local/bin directory to the PATH environment variable
-export PATH=$PATH:$HOME/.local/bin
 
 # Run the Docker container
 docker run -it \
@@ -72,6 +73,7 @@ docker run -it \
   --privileged=true \
   --hostname=archlinux \
   -v $HOME:/home/asioud \
-  archlinux:42
+  arch:42
 ```
 You are now logged in your docker Linux container and you've mounted the mac's home directory into the arch's linux home directory.
+
