@@ -76,5 +76,3 @@ docker run -it \
   arch:42
 ```
 You are now logged in your docker Linux container and you've mounted the mac's home directory into the arch's linux home directory.
-
-
